@@ -3,11 +3,11 @@ Application providing CDN and Image Recognition services. Implemented in the con
 
 ## Prerequisities
 
-Maven
-Spring Boot
-Postgres
-Docker
-Docker-compose
+* Maven
+* Spring Boot
+* Postgres
+* Docker
+* Docker-compose
 
 ## Instructions
 
