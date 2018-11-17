@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import service.storage.model.Image;
+import service.storage.model.Result;
 import service.storage.service.StorageService;
 
 @RestController
-@RequestMapping("/api/v1_0")
+@RequestMapping("/api/v1")
 public class CdnApiController {
 
 	public static final Logger logger = LoggerFactory.getLogger(CdnApiController.class);
@@ -40,12 +41,12 @@ public class CdnApiController {
 	 * @return A String indicating the Public Id of the stored Image with the Http Status CREATED.
 	 */
 	@RequestMapping(value="/user/", method=RequestMethod.POST)
-	public ResponseEntity<String> addUserImg(@RequestParam("file") MultipartFile img){
-		logger.info("Adding a User Image.");
-		
-		String result = storageService.store(img, "user");
-		return new ResponseEntity<String>(result, HttpStatus.CREATED);
-	}
+	public ResponseEntity<Result> addUserImg(@RequestParam("file") MultipartFile img){
+        logger.info("Adding a User Image.");
+        
+        Result result = new Result("Id: "+storageService.store(img, "user").replaceAll("user/", ""));
+        return new ResponseEntity<Result>(result, HttpStatus.CREATED);
+    }
 	
 	
 	/**
@@ -55,15 +56,15 @@ public class CdnApiController {
 	 */
 	@RequestMapping(value="/user/{id}", method=RequestMethod.GET)
 	public ResponseEntity<?> getUserImg(@PathVariable String id){
-		logger.info("Retrieving Image with id {}.", id);
-		
-		if (!storageService.imgExists(id)) {
-			logger.error("Image with id {} not found",id);
-			return new ResponseEntity<String>("Image with id "+id+" not found",HttpStatus.NOT_FOUND);
-		}
-		
-		return new ResponseEntity<Image>(storageService.load(id, "user"),HttpStatus.OK);
-	}
+        logger.info("Retrieving Image with id {}.", id);
+        
+        if (!storageService.imgExists(id)) {
+            logger.error("Image with id {} not found",id);
+            return new ResponseEntity<Result>(new Result("Error: Image with id "+id+" not found"),HttpStatus.NOT_FOUND);
+        }
+        
+        return new ResponseEntity<Image>(storageService.load(id, "user"),HttpStatus.OK);
+    }
 	
 	
 	/**
@@ -73,17 +74,17 @@ public class CdnApiController {
 	 * @return A String indicating the Public Id of the updated Image with the Http Status CREATED. In case the Image is not found, a String is returned with the Http Status NOT FOUND.
 	 */
 	@RequestMapping(value="/user/{id}", method=RequestMethod.PUT)
-	public ResponseEntity<String> updateUserImg(@RequestParam("file") MultipartFile img, @PathVariable("id") String id){
-		logger.info("Adding Image with id {}.", id);
-		
-		if (!storageService.imgExists(id)) {
-			logger.error("Image with id "+id+" not found.");
-			return new ResponseEntity<String>("Image with id "+id+" not found.", HttpStatus.NOT_FOUND);
-		}
-		
-		String result = storageService.update(img, id, "user");
-		return new ResponseEntity<String>(result, HttpStatus.CREATED);
-	}
+	public ResponseEntity<Result> updateUserImg(@RequestParam("file") MultipartFile img, @PathVariable("id") String id){
+        logger.info("Adding Image with id {}.", id);
+        
+        if (!storageService.imgExists(id)) {
+            logger.error("Image with id "+id+" not found.");
+            return new ResponseEntity<Result>(new Result("Error: Image with id "+id+" not found."), HttpStatus.NOT_FOUND);
+        }
+        
+        Result result = new Result("Id: "+storageService.update(img, id, "user").replaceAll("user/", ""));
+        return new ResponseEntity<Result>(result, HttpStatus.CREATED);
+    }
 	
 	
 	/**
@@ -92,17 +93,17 @@ public class CdnApiController {
 	 * @return A String indicating the delete operation was a succes with the Http Status OK. In case the image is not found, a String is returned with the Http Status NOT FOUND.
 	 */
 	@RequestMapping(value="/user/{id}", method=RequestMethod.DELETE)
-	public ResponseEntity<String> deleteUserImg(@PathVariable("id") String id){
-		logger.info("Deleting Image with id {}.",id);
-		
-		if (!storageService.imgExists(id)) {
-			logger.error("Image with id {} not found.", id);
-			return new ResponseEntity<String>("Image with id "+id+" not found.",HttpStatus.NOT_FOUND);
-		}
-		
-		String result = storageService.delete(id,"user");
-		return new ResponseEntity<String>(result, HttpStatus.OK);
-	}
+	public ResponseEntity<Result> deleteUserImg(@PathVariable("id") String id){
+        logger.info("Deleting Image with id {}.",id);
+        
+        if (!storageService.imgExists(id)) {
+            logger.error("Image with id {} not found.", id);
+            return new ResponseEntity<Result>(new Result("Error: Image with id "+id+" not found."),HttpStatus.NOT_FOUND);
+        }
+        
+        String result = storageService.delete(id,"user");
+        return new ResponseEntity<Result>(new Result("Info: "+result), HttpStatus.OK);
+    }
 	
 	
 	//----------------------Locations---------------------------
@@ -112,12 +113,12 @@ public class CdnApiController {
 	 * @return A String indicating the Public Id of the stored Image with the Http Status CREATED.
 	 */
 	@RequestMapping(value="/local/", method=RequestMethod.POST)
-	public ResponseEntity<String> addLocationImg(@RequestParam("file") MultipartFile img){
-		logger.info("Adding a Location Image.");
-		
-		String result = storageService.store(img, "location");
-		return new ResponseEntity<String>(result,HttpStatus.CREATED);
-	}
+	public ResponseEntity<Result> addLocationImg(@RequestParam("file") MultipartFile img){
+        logger.info("Adding a Location Image.");
+        
+        Result result = new Result("Id: "+storageService.store(img, "location").replaceAll("location/", ""));
+        return new ResponseEntity<Result>(result,HttpStatus.CREATED);
+    }
 	
 	
 	/**
@@ -127,15 +128,15 @@ public class CdnApiController {
 	 */
 	@RequestMapping(value="/local/{id}", method=RequestMethod.GET)
 	public ResponseEntity<?> getLocationImg(@PathVariable("id") String id){
-		logger.info("Retrieving Image with id {}.", id);
-		
-		if (!storageService.imgExists(id)) {
-			logger.error("Image with id {} not found.",id);
-			return new ResponseEntity<String>("Image with id "+id+" not found.",HttpStatus.NOT_FOUND);
-		}
-		
-		return new ResponseEntity<Image>(storageService.load(id,"location"), HttpStatus.OK);
-	}
+        logger.info("Retrieving Image with id {}.", id);
+        
+        if (!storageService.imgExists(id)) {
+            logger.error("Image with id {} not found.",id);
+            return new ResponseEntity<Result>(new Result("Error: Image with id "+id+" not found."),HttpStatus.NOT_FOUND);
+        }
+        
+        return new ResponseEntity<Image>(storageService.load(id,"location"), HttpStatus.OK);
+    }
 	
 	
 	/**
@@ -145,17 +146,17 @@ public class CdnApiController {
 	 * @return A String indicating the Public Id of the updated Image with the Http Status CREATED. In case the Image is not found, a String is returned with the Http Status NOT FOUND.
 	 */
 	@RequestMapping(value="/local/{id}", method=RequestMethod.PUT)
-	public ResponseEntity<String> updateLocationImg(@RequestParam("file") MultipartFile img, @PathVariable("id") String id){
-		logger.info("Updating Image with id {}.", id);
-		
-		if (!storageService.imgExists(id)) {
-			logger.error("Image with id {} not found", id);
-			return new ResponseEntity<String>("Image with id "+id+" not found", HttpStatus.NOT_FOUND);
-		}
-		
-		String result = storageService.update(img, id, "location");
-		return new ResponseEntity<String>(result, HttpStatus.CREATED);
-	}
+	public ResponseEntity<Result> updateLocationImg(@RequestParam("file") MultipartFile img, @PathVariable("id") String id){
+        logger.info("Updating Image with id {}.", id);
+        
+        if (!storageService.imgExists(id)) {
+            logger.error("Image with id {} not found", id);
+            return new ResponseEntity<Result>(new Result("Error: Image with id "+id+" not found"), HttpStatus.NOT_FOUND);
+        }
+        
+        Result result = new Result("Id: "+storageService.update(img, id, "location").replaceAll("location/", ""));
+        return new ResponseEntity<Result>(result, HttpStatus.CREATED);
+    }
 	
 	
 	/**
@@ -164,15 +165,15 @@ public class CdnApiController {
 	 * @return A String indicating the delete operation was a succes with the Http Status OK. In case the image is not found, a String is returned with the Http Status NOT FOUND.
 	 */
 	@RequestMapping(value="/local/{id}", method=RequestMethod.DELETE)
-	public ResponseEntity<String> deleteLocationImg(@PathVariable String id){
-		logger.info("Deleting Image with id {}.",id);
-		
-		if (!storageService.imgExists(id)) {
-			logger.error("Image with id {} not found.", id);
-			return new ResponseEntity<String>("Image with id "+id+" not found.",HttpStatus.NOT_FOUND);
-		}
-		
-		String result = storageService.delete(id,"location");
-		return new ResponseEntity<String>(result, HttpStatus.OK);
-	}
+	public ResponseEntity<Result> deleteLocationImg(@PathVariable String id){
+        logger.info("Deleting Image with id {}.",id);
+        
+        if (!storageService.imgExists(id)) {
+            logger.error("Image with id {} not found.", id);
+            return new ResponseEntity<Result>(new Result("Error: Image with id "+id+" not found."),HttpStatus.NOT_FOUND);
+        }
+        
+        String result = storageService.delete(id,"location");
+        return new ResponseEntity<Result>(new Result("Info: "+result), HttpStatus.OK);
+    }
 }

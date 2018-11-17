@@ -48,10 +48,10 @@ public class ImgSystemStorageService implements StorageService{
 		try {
 			// Check if file is empty
             if (img.isEmpty())
-                throw new StorageException("Failed to store empty image " + filename + ".");
+                throw new StorageException("Error: Failed to store empty image " + filename + ".");
             // Security check
             if (filename.contains(".."))
-                throw new StorageException("Failed to store image. Image " + filename +" has an invalid name.");
+                throw new StorageException("Error: Failed to store image. Image " + filename +" has an invalid name.");
             
             // Store the image in Cloudinary
         	if (mode.equals("user"))
@@ -67,14 +67,14 @@ public class ImgSystemStorageService implements StorageService{
         		uploadResult = cloudinary.uploader().uploadLarge(img.getBytes(), params);
         	
         	// Store info in local database
-        	Image image = new Image(uploadResult.get("public_id").toString(),uploadResult.get("url").toString(),uploadResult.get("secure_url").toString());
+        	Image image = new Image(uploadResult.get("public_id").toString().replace(mode+"/", ""),uploadResult.get("url").toString(),uploadResult.get("secure_url").toString());
         	repository.save(image);
             
         	return uploadResult.get("public_id").toString();
         }catch (IOException e) {
-            throw new StorageException("Failed to store image " + filename + ".", e);
+            throw new StorageException("Error: Failed to store image " + filename + ".", e);
         }catch (RuntimeException r) {
-        	throw new StorageException("Failed to store image " + filename + ".", r);
+        	throw new StorageException("Error: Failed to store image " + filename + ".", r);
         }
 	}
 	
@@ -90,18 +90,13 @@ public class ImgSystemStorageService implements StorageService{
 		Image result;
 		
 		// Find image in local database
-		if (mode == "user")
-			result = repository.findByPublicId("user/"+publicId);
-		else if (mode == "location")
-			result = repository.findByPublicId("location/"+publicId);
-		else
-			result = repository.findByPublicId(publicId);
+		result = repository.findByPublicId(publicId);
 		
 		// Check if the result is null
 		if (result != null)
 			return result;
 		else
-			throw new StorageException("Image with public id "+publicId+" not found.");
+			throw new StorageException("Error: Image with public id "+publicId+" not found.");
 	}
 	
 
@@ -116,29 +111,25 @@ public class ImgSystemStorageService implements StorageService{
 	@Override
 	public String update(MultipartFile img, String publicId, String mode) {
 		String filename = img.getOriginalFilename();
-		String pId;
 		
 		try {
 			// Check if image is empty
 			if (img.isEmpty())
-				throw new StorageException("Failed to empty image " + filename + ".");
+				throw new StorageException("Error: Failed to empty image " + filename + ".");
 			// Security check
 			if (filename.contains(".."))
-				throw new StorageException("Failed to store image. Image " + filename +" has an invalid name.");
+				throw new StorageException("Error: Failed to store image. Image " + filename +" has an invalid name.");
 			
 			// Delete the image in Cloudinary
 			if (mode.equals("user")) {
 				cloudinary.uploader().destroy("user/"+publicId, ObjectUtils.asMap("invalidate",true));
 				params = ObjectUtils.asMap("folder", "user", "public_id", ""+publicId);
-				pId = "user/"+publicId;
 			} else if (mode.equals("location")) {
 				cloudinary.uploader().destroy("location/"+publicId, ObjectUtils.asMap("invalidate",true));
 				params = ObjectUtils.asMap("folder", "location", "public_id", ""+publicId);
-				pId = "location/"+publicId;
 			} else {
 				cloudinary.uploader().destroy(""+publicId, ObjectUtils.asMap("invalidate",true));
 				params = ObjectUtils.emptyMap();
-				pId = ""+publicId;
 			}
 			
 			// Update the image in cloudinary
@@ -148,17 +139,17 @@ public class ImgSystemStorageService implements StorageService{
         		uploadResult = cloudinary.uploader().uploadLarge(img.getBytes(), params);
 			
 			// Update the local database
-			Image res = repository.findByPublicId(pId);
-			res.setPublicId(uploadResult.get("public_id").toString());
+			Image res = repository.findByPublicId(publicId);
+			res.setPublicId(publicId);
 			res.setUrl(uploadResult.get("url").toString());
 			res.setSecureUrl(uploadResult.get("secure_url").toString());
 			repository.save(res);
 			
 			return uploadResult.get("public_id").toString();
 		} catch (IOException e) {
-			throw new StorageException("Failed to store image " + filename + ".",e);
+			throw new StorageException("Error: Failed to store image " + filename + ".",e);
 		} catch (RuntimeException r) {
-			throw new StorageException("Failed to store image " + filename + ".",r);
+			throw new StorageException("Error: Failed to store image " + filename + ".",r);
 		}
 	}
 	
@@ -183,17 +174,12 @@ public class ImgSystemStorageService implements StorageService{
 			
 			// Delete image info in local database
 			Image result;
-			if (mode == "user")
-				result = repository.findByPublicId("user/"+publicId);
-			else if (mode == "location")
-				result = repository.findByPublicId("location/"+publicId);
-			else
-				result = repository.findByPublicId(publicId);
+			result = repository.findByPublicId(publicId);
 			repository.delete(result);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new StorageException("Error: Failed to delete image with id " + publicId + ".",e);
 		} catch (RuntimeException r) {
-			r.printStackTrace();
+			throw new StorageException("Error: Failed to delete image with id " + publicId + ".",r);
 		}
 		return "Image with public id "+publicId+" was successfully deleted.";
 	}
@@ -207,7 +193,7 @@ public class ImgSystemStorageService implements StorageService{
 	@Override
 	public boolean imgExists(String publicId) {
 		// Check if there's image info in local database
-		if (repository.findByPublicId(publicId) != null || repository.findByPublicId("location/"+publicId) != null || repository.findByPublicId("user/"+publicId) != null)
+		if (repository.findByPublicId(publicId) != null)
 			return true;
 		else
 			return false;
