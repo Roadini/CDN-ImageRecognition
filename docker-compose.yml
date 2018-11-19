@@ -2,27 +2,34 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:latest 
-    container_name: db
+    restart: always
+    image: postgres
+    container_name: roadini_cdn_db
     environment:
-      - POSTGRES_PASSWORD=
-      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=cdnadmin
       - POSTGRES_DB=dbCDN
-    ports:
-      - "8000:5432"
+    networks:
+      - roadiniserver_proxynet
+    volumes:
+        - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+        - ./backups/postgresql:/backupo
 
   api:
-    build: ./CDNservice
+    container_name: cdnapi
+    image: cdn
     working_dir: /app
     volumes:
-      - ./CDNserice:/app
-    container_name: api
+      - ./CDNservice:/app
     links:
       - postgres
     ports:
-      - "8080:8080"
-    expose:
-      - "8080"
+      - "9001:9001"
     command: mvn clean spring-boot:run
     depends_on:
       - postgres
+    networks:
+      - roadiniserver_proxynet
+networks:
+    roadiniserver_proxynet:
+        external: true
+
