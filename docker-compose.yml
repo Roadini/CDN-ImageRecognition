@@ -26,3 +26,15 @@ services:
     command: mvn clean spring-boot:run
     depends_on:
       - postgres
+
+  recognition:
+    build: ./ImageRecognition
+    working_dir: /imageApp
+    volumes:
+      - ./ImageRecognition:/imageApp
+    container_name: imageRecognition
+    ports:
+      - "8081:8080"
+    expose:
+      - "8081"
+    command: mvn clean spring-boot:run
