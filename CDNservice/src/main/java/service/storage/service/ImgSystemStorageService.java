@@ -31,7 +31,7 @@ public class ImgSystemStorageService implements StorageService{
 	 */
 	@Autowired
 	public ImgSystemStorageService() {
-		this.cloudinary = new Cloudinary("cloudinary://891399153441365:jBHIk_nBDM38RCp8WQPZdhoQ_dU@jm-es-cloud");
+		this.cloudinary = new Cloudinary("cloudinary://api-key:api-secret@name-of-cloud");
 	}	
 	
 	/**
