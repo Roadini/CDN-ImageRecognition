@@ -27,7 +27,17 @@ services:
       - postgres
     networks:
       - roadiniserver_proxynet
+
+  recognition:
+    build: ./ImageRecognition
+    working_dir: /imageApp
+    volumes:
+      - ./ImageRecognition:/imageApp
+    container_name: imageRecognition
+    command: mvn clean spring-boot:run
+    networks:
+      - roadiniserver_proxynet
+
 networks:
     roadiniserver_proxynet:
         external: true
-

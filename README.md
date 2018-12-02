@@ -11,8 +11,8 @@ Application providing CDN and Image Recognition services. Implemented in the con
 
 ## Instructions
 
-To run the application, clone to your machine, define a Postgres user and its password in the files application.properties and docker-compose.yml.
-Next, run the following command
+To run the application, clone to your machine, define a Postgres user and its password in the files application.properties and docker-compose.yml. Next download an API Key from Google Cloud platform and rename it credentials.json.
+Afterwards, run the following command
 ```
 docker-compose build
 ```
