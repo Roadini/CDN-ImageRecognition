@@ -22,8 +22,6 @@ services:
       - ./CDNservice:/app
     links:
       - postgres
-    ports:
-      - "9001:9001"
     command: mvn clean spring-boot:run
     depends_on:
       - postgres
