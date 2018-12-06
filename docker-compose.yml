@@ -2,50 +2,51 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:latest 
-    container_name: db
+    restart: always
+    image: postgres
+    container_name: roadini_cdn_db
     environment:
-      - POSTGRES_PASSWORD=
-      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=cdnadmin
       - POSTGRES_DB=dbCDN
-    ports:
-      - "8000:5432"
+    networks:
+      - roadiniserver_proxynet
+    volumes:
+        - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+        - ./backups/postgresql:/backupo
 
   apiv1:
-    build: ./CDNservice/v1
-    working_dir: /app
+    container_name: cdnapiv1
+    image: cdnv1
+    working_dir: /cdnv1app
     volumes:
-      - ./CDNservice/v1:/app
-    container_name: apiv1
+      - ./CDNservice/v1:/cdnv1app
     links:
       - postgres
-    ports:
-      - "8080:8080"
-    expose:
-      - "8080"
     command: mvn clean spring-boot:run
     depends_on:
       - postgres
+    networks:
+      - roadiniserver_proxynet
 
   apiv2:
-    build: ./CDNservice/v2
-    working_dir: /app
+    container_name: cdnapiv2
+    image: cdnv2 
+    working_dir: /cdnv2app
     volumes:
-      - ./CDNservice/v2:/app
-    container_name: apiv1
-    ports:
-      - "8082:8080"
-    expose:
-      - "8082"
+      - ./CDNservice/v2:/cdnv2app
+    networks:
+      - roadiniserver_proxynet
 
   recognition:
-    build: ./ImageRecognition
-    working_dir: /imageApp
-    volumes:
-      - ./ImageRecognition:/imageApp
     container_name: imagerecognition
-    ports:
-      - "8081:8080"
-    expose:
-      - "8081"
+    image: imgrecog
+    working_dir: /imageapp
+    volumes:
+      - ./ImageRecognition:/imageapp
     command: mvn clean spring-boot:run
+    networks:
+      - roadiniserver_proxynet
+
+networks:
+    roadiniserver_proxynet:
+        external: true
