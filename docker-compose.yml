@@ -11,12 +11,12 @@ services:
     ports:
       - "8000:5432"
 
-  api:
-    build: ./CDNservice
+  apiv1:
+    build: ./CDNservice/v1
     working_dir: /app
     volumes:
-      - ./CDNservice:/app
-    container_name: api
+      - ./CDNservice/v1:/app
+    container_name: apiv1
     links:
       - postgres
     ports:
@@ -27,12 +27,23 @@ services:
     depends_on:
       - postgres
 
+  apiv2:
+    build: ./CDNservice/v2
+    working_dir: /app
+    volumes:
+      - ./CDNservice/v2:/app
+    container_name: apiv1
+    ports:
+      - "8082:8080"
+    expose:
+      - "8082"
+
   recognition:
     build: ./ImageRecognition
     working_dir: /imageApp
     volumes:
       - ./ImageRecognition:/imageApp
-    container_name: imageRecognition
+    container_name: imagerecognition
     ports:
       - "8081:8080"
     expose:
