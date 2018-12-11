@@ -20,7 +20,7 @@ To run the CDN services, the user must:
 	* There's no need for configuration since it stores in a local file system
 * Define the ports in which the services will communicate in the docker-compose.yml file
 
-TO run the Image Recognition service, the user must:
+To run the Image Recognition service, the user must:
 * Clone the repository to the local machine
 * Copy an API Key from Google Cloud platform
 * Rename it as credentials.json
@@ -39,5 +39,5 @@ docker-compose up
 to run the containers. This may take a few minutes, since it will be installing Maven dependencies to run each service.
 
 ## Version
-CDN - Version 2.0
+CDN - Version 2.0 <br />
 ImageRecognition - Version 1.0
